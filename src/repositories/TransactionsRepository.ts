@@ -1,6 +1,8 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, getRepository } from 'typeorm';
 
 import Transaction from '../models/Transaction';
+
+import Category from '../models/Category';
 
 interface Balance {
   income: number;
@@ -40,6 +42,33 @@ const balance = {
 
 return balance;
   }
+
+  public async listTransactions(): Promise<Transaction>{
+    const transactionsRepository = await this.find();
+
+    const categoryRepository = getRepository(Category);
+
+    console.log("teste");
+    const completedTransactions = transactionsRepository.map(transaction => ({
+      title: transaction.title,
+      id: transaction.id,
+      type: transaction.type,
+      value: transaction.value,
+      category: categoryRepository.findOne({
+        where: {title: transaction.category}
+      }),
+      created_at: transaction.created_at,
+      update_at: transaction.updated_at
+    })
+  )
+  console.log(completedTransactions);
+
+  return(completedTransactions);
+  }
+
+
 }
+
+
 
 export default TransactionsRepository;
